@@ -1,21 +1,24 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+
 
 //Load env vars
 dotenv.config({path:'./config/config.env'});
 
+//connect to database
+connectDB();
+
+//route files
+const hospitals = require('./routes/hospitals');
 const app = express();
+app.use('/api/v1/hospital',hospitals);
+const PORT = process.env.PORT || 4000;
+const server = app.listen(PORT,console.log('Server running in',process.env.NODE_ENV,'mode on port',PORT));
 
-app.get('/',(req,res) => {
-    //1. res.send('<h1> Hello from express </h1>');
-    //2. res.send({name : 'Brad'});
-    //3. res.json({name : 'Brad'});
-    //4. res.sendStatus(400);
-    //5. res.status(400).json({success:false});
-    res.status(200).json({success : true, data:{id:1}});
+//handle unhandled promises rejections
+process.on('inhandleRejection',(err,promise)=>{
+    console.log(`Error: ${err.message}`);
+    //Close Server & exit process
+    server.close(()=>process.exit(1));
 });
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT,console.log('Server running in',process.env.NODE_ENV,'mode on port',PORT));
-
-
