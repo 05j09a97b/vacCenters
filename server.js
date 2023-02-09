@@ -12,7 +12,11 @@ connectDB();
 //route files
 const hospitals = require('./routes/hospitals');
 const app = express();
-app.use('/api/v1/hospital',hospitals);
+
+//add body parser
+app.use(express.json());
+app.use('/api/v1/hospitals',hospitals);
+
 const PORT = process.env.PORT || 4000;
 const server = app.listen(PORT,console.log('Server running in',process.env.NODE_ENV,'mode on port',PORT));
 
