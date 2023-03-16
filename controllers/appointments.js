@@ -8,9 +8,9 @@ const Hospital = require('../models/Hospital');
 //@access Private
 exports.getAppointments = async(req,res,next)=>{
     let query;
-    //Genetal User can see only their appointments!
+    //General User can see only their appointments!
     if(req.user.role !== 'admin'){
-        query=Appointment.find({user:req.id}).populate({
+        query=Appointment.find({user:req.user.id}).populate({
             path:'hospital',
             select:'name province tel'
         });
@@ -29,10 +29,7 @@ exports.getAppointments = async(req,res,next)=>{
         });
     }catch(err){
         console.log(err.stack);
-        return res.status(500).json({
-            success:false,
-            message:"Cannot find Appointment"
-        });
+        return res.status(500).json({success:false,message:"Cannot find Appointment"});
     }
 };
 
@@ -65,23 +62,22 @@ exports.addAppointment = async(req,res,next)=>{
         const hospital = await Hospital.findById(req.params.hospitalId);
         if(!hospital){
             return res.status(404).json({success: false,meassage: `No hospital with the id of ${req.params.hospital}`});
-         //add user Id to req.body
-        req.body.user = req.user.id;
-        //check for existed appointment
-        const existedAppoinment = await Appointment.find({user:req.user.id});
-        //If the user is not an admin, they can inly create 3 appoinment.
-        if(existedAppoinment.length >= 3 && req.user.role !== 'admin'){
-        return res.status(400).json({success:false,message:`The User with id ${req.params.id} has already made 3 appointments`})};
         }
+        req.body.user = req.user.id;
+        const existedAppoinment = await Appointment.find({user:req.user.id});
+        if(existedAppoinment.length >= 3 && req.user.role !== 'admin'){
+            return res.status(400).json({success:false,message:`The User with id ${req.params.id} has already made 3 appointments`});
+        }
+        req.body.hospital = req.params.hospitalId;
         const appointment = await Appointment.create(req.body);
         res.status(200).json({success:true,data:appointment});
-    
-    }catch(err){
+    } catch (err){
         console.log(err.stack);
         return res.status(500).json({success:false,message: 'Cannot create appointment'});
     }
-    
-    };
+}
+
+
 
 //@desc Update appointment
 //@route Put /api/v1/appointments/ :id
@@ -91,15 +87,16 @@ exports.updateAppointment = async(req,res,next)=>{
         let appointment = await Appointment.findById(req.params.id);
         if(!appointment){
             return res.status(404).json({success:false,message:`No Appt with id ${req.params.id}`});
-            //make sure user is the appointment owner
-            if(appointment.user.toString()!==req.params.id && req.params.role !== 'admin'){
-                return res.status(401).json({success:false, message:`User ${req.user.id} is not authorized to update this appointment`});
-            }
         }
+        //make sure user is the appointment owner
+        if(appointment.user.toString() !== req.user.id && req.user.role !== 'admin'){
+            return res.status(401).json({success:false,message:`user ${req.user.id} is not authorized to update this appointment`});
+        }
+
         appointment = await Appointment.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true});
         res.status(200).json({success:true,data:appointment});
     } catch (error) {
-        console.log(err.stack);
+        console.log(error.stack);
         return res.status(500).json({success:false,message:'Cannot Update Appointment'});
         
     }
