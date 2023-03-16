@@ -36,7 +36,7 @@ const HospitalSchema = new mongoose.Schema({
     toObject: {virtuals:true}
 });
 //Reverse populate with virtual
-HospitalSchema.virtual('appointment',{
+HospitalSchema.virtual('appointments',{
     ref: 'Appointment',
     localField: '_id',
     foreignField: 'hospital',

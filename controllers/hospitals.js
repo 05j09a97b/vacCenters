@@ -5,7 +5,7 @@ const Hospital = require("../models/Hospital");
 // @access Public
 exports.getHospitals = async (req, res, next) => {
     let query;
-  
+    let hospitalId = req.params.hospitalId;
     // Copy req.query
     const reqQuery = { ...req.query };
   
