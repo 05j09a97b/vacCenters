@@ -1,10 +1,10 @@
-const mysql = require("mysql");
+const mysql = require('mysql');
 
-var connection = mysql.createPool({
+var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    passsword: '12345678',
-    database: 'vacCenter'
+    password: '12345678',
+    database: 'vacCenter',
 });
 
 module.exports = connection;

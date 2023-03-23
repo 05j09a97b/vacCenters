@@ -10,7 +10,7 @@ const VacCenter = function(vacCenter){
 
 VacCenter.getAll = result =>{
     sql.query("SELECT * FROM vacCenters",(err,res) => {
-        if(err){
+        if (err) {
             console.log("error:", err);
             result(null,err);
             return;
